@@ -1,0 +1,5 @@
+---
+
+known_hosts: "{{ lookup('env', 'HOME') }}/.ssh/known_hosts"
+
+...

@@ -1,0 +1,65 @@
+---
+
+- name: Create a temporary working directory
+  tempfile:
+    state: directory
+  delegate_to: localhost
+  run_once: true
+  register: wrkdir
+  check_mode: no
+  notify: cleanup
+
+- name: The short name is just the first field of the hostname
+  set_fact:
+    short_name: "{{ inventory_hostname.split('.')[0] }}"
+
+- name: Lookup inventory_host IPv4 address in the DNS
+  set_fact:
+    host_ipv4: "{{ lookup('dig', inventory_hostname, 'qtype=A', 'flat=0', 'wantlist=True').address|default(None) }}"
+
+- name: Lookup inventory_host IPv6 address in the DNS
+  set_fact:
+    host_ipv6: "{{ lookup('dig', inventory_hostname, 'qtype=AAAA', 'flat=0', 'wantlist=True').address|default(None) }}"
+
+- name: Create prefix for known_hosts entry
+  set_fact:
+    known_hosts_prefix: "{{ [ short_name, inventory_hostname, ansible_host, host_ipv4, host_ipv6 ]|flatten|unique|select('match', '^.+$')|join(',') }}"
+
+#- debug:
+#    var: known_hosts_prefix
+
+- name: Scan inventory_host for SSH keys
+  shell: >-
+    ssh-keyscan "{{ known_hosts_prefix }}" \
+      > new_known_hosts.{{ inventory_hostname }}
+  args:
+    chdir: "{{ wrkdir.path }}"
+  delegate_to: localhost
+  check_mode: no
+  changed_when: false
+
+- name: Merge updated SSH keys into known_hosts
+  shell: >-
+    perl -lane \
+      '$kh{"$F[0] $F[1]"}=$_; END { for my $x ( sort values %kh ) { print $x; } }'  \
+      {{ known_hosts }} new_known_hosts.* > ./known_hosts ; \
+    diff -q ./known_hosts '{{ known_hosts }}' ;
+  args:
+    chdir: "{{ wrkdir.path }}"
+  register: known_hosts_merge
+  failed_when: known_hosts_merge.rc >= 2
+  changed_when: known_hosts_merge.rc == 1
+  delegate_to: localhost
+  run_once: true
+  check_mode: no
+
+- name: Install the updated known_hosts file
+  copy:
+    src: "{{ wrkdir.path }}/known_hosts"
+    dest: "{{ known_hosts }}"
+    remote_src: yes
+    backup: yes
+  delegate_to: localhost
+  run_once: true
+
+...
