@@ -13,7 +13,7 @@ That has never struck me as a sensible choice.  Instead, this role
 provides a means of adding known_hosts entries for hosts from the
 ansible inventory.
 
-This is based around [ssh-keyscan(1)](https://man.openbsd.org/ssh-keyscan.1)
+This is based around [ssh-keyscan(1)](https://man.openbsd.org/ssh-keyscan)
 which must be available locally.  It merges in keys discovered for any of
 the inventory hosts, identified by hostname and IP number (both IPv4 and
 IPv6).  IP numbers are looked up in the DNS or taken from any `ansible_host`
