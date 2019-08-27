@@ -6,8 +6,18 @@ galaxy_info:
   description: Update ~/.ssh/known_hosts with keys for inventory hosts
   license: BSD
   min_ansible_version: 2.0
+  platforms:
+    - name: FreeBSD
+      versions:
+        - all
+    - name: Linux
+      versions:
+        - all
+    - name: MacOS
+      versions:
+        - all
   galaxy_tags:
-    - known_hosts
+    - knownhosts
     - ssh
 dependencies: []
 
