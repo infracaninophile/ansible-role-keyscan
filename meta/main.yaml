@@ -1,0 +1,14 @@
+---
+
+galaxy_info:
+  role_name: keyscan
+  author: Matthew Seaman
+  description: Update ~/.ssh/known_hosts with keys for inventory hosts
+  license: BSD
+  min_ansible_version: 2.0
+  galaxy_tags:
+    - known_hosts
+    - ssh
+dependencies: []
+
+...
