@@ -23,7 +23,7 @@ Requires: dnspython module
 ```
    pip3 install dnspython
 ```
-     - or -
+or
 ```
   pkg install py37-dnspython
 ```
